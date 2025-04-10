@@ -40,7 +40,7 @@ export class InMemoryAccountsRepository extends AccountsRepository {
 
     async findTransactionsByAccountId(
         accountId: string,
-        filter: TransactionFilterDto,
+        filter?: TransactionFilterDto,
     ): Promise<Result<Transaction[], Error>> {
         const txs = this.transactions.filter(
             (tx) =>
@@ -48,7 +48,7 @@ export class InMemoryAccountsRepository extends AccountsRepository {
                 accountId === (tx as Transfer)?.recipientId,
         );
 
-        if (filter.type) {
+        if (filter?.type) {
             return Ok(txs.filter((tx) => tx.type === filter.type));
         }
 

@@ -49,7 +49,44 @@ export class AccountsService {
         return account;
     }
 
-    async getAccountBalance(accountId: string): Promise<number> {
+    async getAccountBalance(accountId: string, date?: string): Promise<number> {
+        if (date) {
+            const txsResult =
+                await this.accountsRepository.findTransactionsByAccountId(
+                    accountId,
+                );
+            if (txsResult.err) {
+                throw txsResult.val;
+            }
+            const txs = txsResult.val;
+            console.log(txs);
+
+            return txs.reduce((balance, tx) => {
+                console.log(
+                    this.toTimestamp(tx.date.toDateString()),
+                    this.toTimestamp(date),
+                );
+                if (
+                    this.toTimestamp(tx.date.toDateString()) <=
+                    this.toTimestamp(date)
+                ) {
+                    if (tx instanceof Withdrawal) {
+                        return balance - tx.amount;
+                    }
+                    if (tx instanceof Deposit) {
+                        return balance + tx.amount;
+                    }
+                    if (tx instanceof Transfer) {
+                        if (tx.accountId === accountId) {
+                            return balance - tx.amount;
+                        } else if (tx.recipientId === accountId) {
+                            return balance + tx.amount;
+                        }
+                    }
+                }
+                return balance;
+            }, 0);
+        }
         const accountResult = await this.getAuthorizedAccount(accountId);
         if (accountResult.err) {
             throw accountResult.val;
@@ -57,6 +94,11 @@ export class AccountsService {
         const account = accountResult.val;
 
         return account.balance;
+    }
+
+    private toTimestamp(strDate: string) {
+        var datum = Date.parse(strDate);
+        return datum / 1000;
     }
 
     async createUserAccount(): Promise<Account> {

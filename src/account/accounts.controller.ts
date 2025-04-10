@@ -85,10 +85,15 @@ export class AccountsController {
         },
     })
     @Get('/accounts/:accountId/balance')
-    async getAccountBalance(@Param('accountId') accountId: string) {
+    async getAccountBalance(
+        @Param('accountId') accountId: string,
+        @Query('date') date: string,
+    ) {
         try {
-            const balance =
-                await this.accountsService.getAccountBalance(accountId);
+            const balance = await this.accountsService.getAccountBalance(
+                accountId,
+                date,
+            );
             return { balance };
         } catch (err) {
             this.handleError(err);

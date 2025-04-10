@@ -16,7 +16,7 @@ export abstract class AccountsRepository {
 
     abstract findTransactionsByAccountId(
         accountId: string,
-        filter: { type: string },
+        filter?: { type: string },
     ): Promise<Result<Transaction[], Error>>;
 
     abstract createTransaction(tx: Transaction): Promise<Result<null, Error>>;
